@@ -1,0 +1,331 @@
+import { Controller, useSpring, config } from '@react-spring/three'
+import { Plane } from '@react-three/drei'
+import { ThreeElements, ThreeEvent, useFrame, useLoader } from '@react-three/fiber'
+import { useEffect, useRef, useState } from 'react'
+import {
+  CustomBlending, Group, NearestFilter, OneFactor,
+  OneMinusSrcAlphaFactor, SrcAlphaFactor,
+  Texture,
+  TextureLoader, Vector3
+} from 'three'
+import useDragRotate from '../hooks/useDragRotate'
+import useDynamicTexture from '../hooks/useDynamicTexture'
+import useScene from '../hooks/useScene'
+import useConstants, {
+  CASSETTE_CLICK_TRANSLATE_Z,
+  CASSETTE_FLOOR_Y,
+  CASSETTE_HOVER_TRANSLATE_Y,
+  DRAG_HINT_ANIMATION_ROTATION,
+} from '../stores/useConstants'
+import useShelves, { CassetteData } from '../stores/useShelves'
+import useStore from '../stores/useStore'
+import UrlConfig from '../url-config'
+import setCursor from '../util/setCursor'
+import Ground from './Ground'
+import { useScrollToGroup } from './Scroll'
+import VideoPlayer, { VideoPlayerProps } from './VideoPlayer'
+
+export type CassetteProps = {
+  data: CassetteData
+} & ThreeElements['group']
+
+export default function Cassette({ data: cassette, ...props }: CassetteProps) {
+  const { sleeveMesh, sleeveMaterial, vhsMesh, vhsMaterial } = useScene()
+
+  const { cassetteAngle, cassetteClickTargetX } = useConstants()
+
+  const { ref: parentWrapper, scrollToObject: scrollToShelf } =
+    useScrollToGroup()
+
+  const dynamicMaterial = useDynamicTexture(sleeveMaterial, cassette.texture)
+  const cassetteWrapper = useRef<Group>(null)
+  const videoWrapper = useRef<Group>(null)
+
+  const [selected, setSelected] = useState(false)
+  const [showVideoPlayer, setShowVideoPlayer] = useState(false)
+  
+  // Click
+  const { cassetteSelected, set } = useStore()
+  const hide = cassetteSelected && !selected
+
+  const [hover, _setHover] = useState(false)
+  const [transitioning, setTransition] = useState(false)
+  const [originalXpos, setOriginalXPos] = useState(cassetteWrapper.current?.position.x || 0)
+
+  const { maxCassettesPerShelf, shelfScale } = useShelves()
+  const isMobile = maxCassettesPerShelf <= 3
+  const [deltaX, setDeltaX] = useState(0)
+  const [cooldownTimer, setCooldownTimer] = useState(0)
+
+  const cassetteTargetX = isMobile ? 0 : cassetteClickTargetX
+  const videoPlayerRotation = isMobile ? 0 : -Math.PI / 18
+  const videoPlayerX = + (isMobile ? deltaX : deltaX + 675)
+  const videoPlayerY = isMobile ? -200 : 0
+  const videoPlayerScale = isMobile ? 0.7 : 1
+
+  const [springs, api] = useSpring(
+    () => ({
+      x: 0,
+      y: 0,
+      z: 0,
+
+      rx: 0,
+      ry: cassetteAngle,
+      rz: 0,
+      videoz: 0,
+
+      config: { mass: 1, friction: 100 }
+    }),
+    []
+  )
+
+  function moveUp() {
+    if (!selected) {
+      api.start({ y: 150, ry: 0 })
+    }
+  }
+
+  function moveDown() {
+    if (!selected) {
+      api.start({ y: 0, ry: cassetteAngle })
+    }
+  }
+
+  // console.log("cassetteWrapper", cassetteWrapper.current?.getWorldPosition(new Vector3()))
+
+  function toggleSelected() {
+    if (dragging || transitioning) return
+    if (cassetteSelected && !selected) return
+    const newSelected = !selected
+
+    if (newSelected) {
+      if (parentWrapper.current) {
+        const { x } = parentWrapper.current.getWorldPosition(new Vector3())
+        const deltaX = (cassetteTargetX - x)
+        api.start({
+          x: deltaX,
+          y: isMobile ? 300 : 0,
+          ry: Math.PI + cassetteAngle,
+          z: 500,
+          // videoz:0
+        })
+      }
+
+      // setHover(false)
+      scrollToShelf()
+      setTransition(true)
+      setTimeout(() => setShowVideoPlayer(true), 333)
+      setTimeout(() => setTransition(false), 1000)
+      document.body.style.overflowY = 'hidden'
+
+    } else {
+      api.start({
+        x: originalXpos,
+        y: 0,
+        ry: cassetteAngle,
+        z: 0,
+        // videoz:2000
+      })
+
+      setTimeout(() => setShowVideoPlayer(false), 1000)
+      document.body.style.overflowY = 'auto'
+    }
+    setSelected(newSelected)
+    set({ cassetteSelected: newSelected })
+  }
+
+  const cassetteGroup = useRef<Group>(null)
+
+  useEffect(() => {
+    if (!cassetteSelected || !selected) return
+    const wrapper = parentWrapper.current
+    if (!wrapper) return
+    const { x } = wrapper.getWorldPosition(new Vector3())
+    const deltaX = (cassetteTargetX - x) / shelfScale
+    setDeltaX(deltaX)
+  }, [
+    parentWrapper.current,
+    cassetteSelected,
+    selected,
+    maxCassettesPerShelf,
+    isMobile,
+    shelfScale,
+    cassetteTargetX,
+  ])
+
+  const [dragState, setDragState] = useState<{
+    initialRotationY: number
+    initialPointerX: number
+  } | null>(null)
+
+
+  const onPointerUp = (e: ThreeEvent<PointerEvent>) => {
+    if (dragging) setDragging(false)
+
+    if (!selected) return toggleSelected()
+
+  }
+
+  const onPointerMove = (e: ThreeEvent<PointerEvent>) => {
+    if (selected && dragging) {
+      setDragging(false)
+      console.log(e)
+    }
+  }
+
+  const onPointerDown = (e: ThreeEvent<PointerEvent>) => {
+    if (dragging) return
+    console.log("not dragging")
+
+    console.log("toggleSelected")
+    // setDragState({
+    //   initialRotationY: cassetteWrapper.current!.rotation.y,
+    //   initialPointerX: e.nativeEvent.clientX,
+    // })
+    // setDragging(true)
+  }
+
+  const { dragging, setDragging } = useDragRotate(
+    {
+      onDrag: e => {
+        const initialPointerX = dragState?.initialPointerX ?? 0
+        const initialRotationY = dragState?.initialRotationY ?? 0
+
+        const deltaX = e.clientX - initialPointerX
+        const ratio = (4 * Math.PI) / window.innerWidth
+        const newRotateY = initialRotationY + deltaX * ratio
+
+        // api.start({ ry: springs.ry.get() + })
+
+        setCursor('grabbing')
+        api.start({ ry: newRotateY })
+
+      },
+      onDragEnd: e => {
+        e.clientX === dragState?.initialPointerX
+        setCursor('auto')
+      },
+      // onHint: side => {
+      //   if (hint === side) return
+      //   // setHint(side)
+      //   const curRotateY = springs.current.get().rotateY
+      //   const coef = side === 'left' ? -1 : 1
+      //   springs.current
+      //     .update({ rotateY: curRotateY + coef * DRAG_HINT_ANIMATION_ROTATION })
+      //     .start()
+      // },
+      // onHintEnd: () => {
+      //   if (hint === 'none') return
+      //   const curRotateY = springs.current.get().rotateY
+      //   const coef = hint !== 'left' ? -1 : 1
+      //   springs.current
+      //     .update({ rotateY: curRotateY + coef * DRAG_HINT_ANIMATION_ROTATION })
+      //     .start()
+      //   // setHint('none')
+      // },
+    },
+    selected
+  )
+
+
+  useFrame(() => {
+    const group = cassetteWrapper.current
+    const wrapper = parentWrapper.current
+    const cassetteObj = cassetteGroup.current
+    const video  = videoWrapper.current
+
+    
+    if (!group || !wrapper || !cassetteObj || !video) return;
+
+    group.position.x = springs.x.get()
+    group.position.y = springs.y.get()
+    group.position.z = springs.z.get()
+
+    group.rotation.x = springs.rx.get()
+    group.rotation.y = springs.ry.get()
+    group.rotation.z = springs.rz.get()
+
+    // videoProps.current!.opacity = springs.videoOpacity.get()
+    // if (cooldownTimer > 0) {
+    // }
+    if (selected && !dragging && !transitioning) {
+      api.start({ ry: springs.ry.get() + 0.1 })
+    }
+
+    video.position.x = springs.videoz.get()
+    video.position.y = 0
+    video.position.z = -springs.videoz.get()
+  })
+
+  return (
+    <group {...props} ref={parentWrapper} >
+
+      {/* // Background plane for click */}
+      <Plane args={[30000, 40000]}
+        onPointerDown={() => selected && toggleSelected()}
+        visible={selected}
+        position={[0, 0, -10000]} >
+        <meshBasicMaterial color={"black"} transparent={true} />
+      </Plane>
+
+      <group ref={cassetteWrapper} >
+        <group
+          ref={cassetteGroup}
+          onPointerOver={() => moveUp()}
+          onPointerOut={() => moveDown()}
+          onPointerDown={onPointerDown}
+          onPointerUp={onPointerUp}
+          onPointerMove={onPointerMove}
+
+          visible={!hide}
+        >
+          <mesh
+            geometry={sleeveMesh.geometry}
+            material={dynamicMaterial}
+            rotation-x={Math.PI / 2}
+            castShadow
+            scale={dragging ? [1, 1, 0.5] : [1, 1, 1]}
+          />
+          <mesh
+            geometry={vhsMesh.geometry}
+            material={vhsMaterial}
+            rotation-x={Math.PI / 2}
+            castShadow
+          />
+        </group>
+
+
+      </group>
+
+      {/* // Back button, not really necessary because all clicks go back */}
+      <Plane args={[30, 30]}
+        // onClick={() => toggleSelected()}
+        visible={selected && showVideoPlayer}
+        position={isMobile ? [deltaX, -250, 1400] : [deltaX + 150, -250, 800]}
+      >
+        <meshBasicMaterial map={new TextureLoader().load(UrlConfig.backButton)}
+          transparent={true}
+          opacity={0.4}
+          color={"white"}
+        />
+      </Plane>
+
+      <group ref={videoWrapper} position={[0,0,0]}>
+        <VideoPlayer
+          visible={selected && showVideoPlayer}
+          url={cassette.video}
+
+          width={960}
+          height={540}
+          scale={32 * videoPlayerScale}
+          position={[videoPlayerX, videoPlayerY, 680]}
+          rotation-y={videoPlayerRotation}
+        />
+      </group>
+      <Ground
+        onClick={() => selected && toggleSelected()}
+        position={[0, CASSETTE_FLOOR_Y, 0]} visible={selected} />
+
+    </group>
+  )
+}
