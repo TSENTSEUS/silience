@@ -174,6 +174,7 @@ export default function Cassette({ data: cassette, ...props }: CassetteProps) {
     springs.current?.update(getSpringState(newSelected)).start()
     setSelected(newSelected)
     set({ cassetteSelected: newSelected })
+
   }
 
   // Align
@@ -299,7 +300,7 @@ export default function Cassette({ data: cassette, ...props }: CassetteProps) {
       >
         <meshBasicMaterial map={new TextureLoader().load(UrlConfig.backButton)}
           transparent={true}
-          opacity={0.9}
+          opacity={1}
           color={"white"}
         />
       </Plane1>

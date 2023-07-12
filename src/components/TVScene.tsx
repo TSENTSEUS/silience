@@ -100,9 +100,9 @@ export default function TVScene(props: ThreeElements['group']) {
   useEffect(() => {
     const onscroll = () => {
       const percent = getScrollPercent()
-      setShowPlayer(percent >= 90)
-      mixerVHS.setTime(map_range(percent, 80, 91, 0, clipVHS.duration * 0.99))
-      mixerSlit.setTime(map_range(percent, 85, 93, 0, clipSlit.duration * 0.99))
+      setShowPlayer(percent >= 80)
+      mixerVHS.setTime(map_range(percent, 75, 81, 0, clipVHS.duration * 0.99))
+      mixerSlit.setTime(map_range(percent, 78, 83, 0, clipSlit.duration * 0.99))
 
     }
     const removeListener = () => window.removeEventListener('scroll', onscroll)

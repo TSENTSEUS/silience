@@ -20,7 +20,7 @@ export default function useBounds() {
     const scrollCameraY: ScrollAnimation = {
       startPercent: 0,
       endPercent: 100 - (0.4 * (TVSCENE_HEIGHT / sceneHeight) * 100),
-      start: isMobile ? (maxCameraY - 0):(maxCameraY),
+      start: isMobile ? (maxCameraY - 20):(maxCameraY),
       end: minCameraY,
     }
 

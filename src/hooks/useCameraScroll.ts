@@ -38,7 +38,7 @@ export default function useScrollAnimation(
 
     // Adjust the start and end values of the scroll animation
     if (isMobile) {
-      scrollAnimation.start = 10 // lower start value for mobile
+      scrollAnimation.start = 1 // lower start value for mobile
       scrollAnimation.end = -20 // lower end value for mobile
     } else {
       scrollAnimation.start = 0 // reset start value for desktop
