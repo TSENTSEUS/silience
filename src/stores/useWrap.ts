@@ -9,8 +9,8 @@ const wrapShelves = (shelves: ShelfData[], categories: CategoryData[], maxPerShe
   // Group cassettes by category (wrapping as needed)
   for (const cassette of allCassettes) {
     const shelf = newShelves.find(shelf =>
-      shelf.name === cassette.category
-      && shelf.cassettes.length + 1 <= maxPerShelf
+        shelf.name === cassette.category
+        && shelf.cassettes.length + 1 <= maxPerShelf
     )
     if (shelf) shelf.cassettes.push(cassette)
     else newShelves.push({

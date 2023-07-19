@@ -174,6 +174,7 @@ export default function Cassette({ data: cassette, ...props }: CassetteProps) {
     springs.current?.update(getSpringState(newSelected)).start()
     setSelected(newSelected)
     set({ cassetteSelected: newSelected })
+    set({ activeCassette: cassette.name })
 
   }
 
@@ -257,8 +258,22 @@ export default function Cassette({ data: cassette, ...props }: CassetteProps) {
         position={[0, 0, -3000]} >
         <meshBasicMaterial color={"black"} transparent={true} />
       </Plane1>
-
+      <Plane1
+          args={[30, 30]}
+          onClick={() => toggleSelected(true)}
+          onPointerOver={() => setCursor("pointer")}
+          onPointerLeave={() => setCursor("auto")}
+          visible={selected && showVideoPlayer}
+          position={isMobile ? [deltaX - 100, 230, 1400] : [deltaX + 86, 230, 800]}
+      >
+        <meshBasicMaterial map={new TextureLoader().load(UrlConfig.backButton)}
+                           transparent={true}
+                           opacity={1}
+                           color={"white"}
+        />
+      </Plane1>
       <group ref={cassetteWrapper} position={[deltaX, 0, 0]}>
+
         <group
           ref={cassetteGroup}
           onClick={(e) => e.stopPropagation()}
@@ -287,20 +302,7 @@ export default function Cassette({ data: cassette, ...props }: CassetteProps) {
 
 
       {/* // Back button, not really necessary because all clicks go back */}
-      <Plane1
-        args={[30, 30]}
-        onClick={() => toggleSelected(true)}
-        onPointerOver={() => setCursor("pointer")}
-        onPointerLeave={() => setCursor("auto")}
-        visible={selected && showVideoPlayer}
-        position={isMobile ? [deltaX - 130, 310, 1400] : [deltaX + 86, 230, 800]}
-      >
-        <meshBasicMaterial map={new TextureLoader().load(UrlConfig.backButton)}
-          transparent={true}
-          opacity={1}
-          color={"white"}
-        />
-      </Plane1>
+
 
       <VideoPlayer
         visible={selected && showVideoPlayer}

@@ -34,7 +34,7 @@ export default function useScrollAnimation(
 
   const onResize = () => {
     // Detect the screen size
-    const isMobile = window.innerWidth < 768
+    const isMobile = window.innerWidth <= 986
 
     // Adjust the start and end values of the scroll animation
     if (isMobile) {
@@ -44,7 +44,6 @@ export default function useScrollAnimation(
       scrollAnimation.start = 0 // reset start value for desktop
       scrollAnimation.end = -1 // reset end value for desktop
     }
-
     onScroll()
   }
 
