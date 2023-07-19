@@ -3,7 +3,7 @@ import { Plane as Plane1 } from '@react-three/drei';
 import { ThreeElements, ThreeEvent, useFrame } from '@react-three/fiber'
 import { useEffect, useRef, useState } from 'react'
 import { Group, TextureLoader, Vector3 } from 'three'
-import '/Users/bapt/Desktop/MERCIV/Active Projects/Silience/Nick Files/silience/src/index.scss';
+import '../index.scss';
 
 import { CSSProperties } from 'react';
 
@@ -251,7 +251,6 @@ export default function Cassette({ data: cassette, ...props }: CassetteProps) {
     <group {...props} ref={parentWrapper}>
       {/* // Background plane for click */}
       <Plane1 
-        id={Number("1")}
         args={[30000, 40000]}
         onClick={() => selected && toggleSelected()}
         visible={selected && showVideoPlayer}
@@ -289,8 +288,6 @@ export default function Cassette({ data: cassette, ...props }: CassetteProps) {
 
       {/* // Back button, not really necessary because all clicks go back */}
       <Plane1
-        id={Number("2")}
-        
         args={[30, 30]}
         onClick={() => toggleSelected(true)}
         onPointerOver={() => setCursor("pointer")}
