@@ -43,7 +43,10 @@ export function useScrollToGroup() {
     const object = ref.current
     if (!object) return
     const { y } = object.getWorldPosition(new Vector3())
-    scrollTo(y)
+    console.log(y, 'to')
+    setTimeout(() => {
+      scrollTo(y)
+    }, 100)
   }
 
   return { ref, scrollToObject }

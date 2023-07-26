@@ -9,7 +9,10 @@ import UrlConfig from './url-config'
 
 const canvasStyle: CSSProperties = {
   position: 'fixed',
-  inset: 0,
+    left: 0,
+    top: 0,
+    height: "100vh",
+    width: "100vw",
 }
 
 export default function App() {
