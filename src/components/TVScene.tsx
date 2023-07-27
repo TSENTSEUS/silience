@@ -62,17 +62,17 @@ export default function TVScene(props: ThreeElements['group']) {
 
   vhsMeshes = vhsMeshes.concat(vhsMeshes2)
 
-  useEffect(() => {
-    vhsMeshes.forEach((mesh, i) => {
-      const texture = textures[i % textures.length]
-      const material = mesh.material as MeshBasicMaterial
-      const newMaterial = material.clone()
-      newMaterial.map = texture
-      texture.flipY = false
-      mesh.material = newMaterial
-      // mesh.name += '-loaded'
-    })
-  }, [vhsMeshes, textures])
+  // useEffect(() => {
+  //   vhsMeshes.forEach((mesh, i) => {
+  //     const texture = textures[i % textures.length]
+  //     const material = mesh.material as MeshBasicMaterial
+  //     const newMaterial = material.clone()
+  //     newMaterial.map = texture
+  //     texture.flipY = false
+  //     mesh.material = newMaterial
+  //     // mesh.name += '-loaded'
+  //   })
+  // }, [vhsMeshes, textures])
 
   // Scroll insert animation
   const tvVhs = tvScene.children.find(child => child.name === 'vhs_animation')
