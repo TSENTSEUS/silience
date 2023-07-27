@@ -1,15 +1,19 @@
 import { PerspectiveCamera } from '@react-three/drei'
-import { ThreeElements } from '@react-three/fiber'
+import {ThreeElements, useFrame} from '@react-three/fiber'
 import { useRef, useEffect } from 'react'
 import { PerspectiveCamera as ThreePerspectiveCamera } from 'three'
 import useBounds from '../hooks/useBounds'
 import useScrollAnimation from '../hooks/useCameraScroll'
 import useConstants from '../stores/useConstants'
+import useStore from "../stores/useStore";
+import useShelves from "../stores/useShelves";
 
 export default function Camera(props: ThreeElements['perspectiveCamera']) {
   const ref = useRef<ThreePerspectiveCamera>()
   const { scrollCameraY, scrollCameraZ } = useBounds()
   const { cameraZ } = useConstants()
+  const { cassetteSelected, activeCassette } = useStore()
+  const { shelves, categories, shelfScale, groundCassettes } = useShelves()
 
   useEffect(() => {
     const handleResize = () => {
@@ -17,8 +21,13 @@ export default function Camera(props: ThreeElements['perspectiveCamera']) {
         ref.current.aspect = window.innerWidth / window.innerHeight
         ref.current.updateProjectionMatrix()
       }
-    }
 
+      setTimeout(() => {
+        const currentPositionY = window.scrollY
+        window.scroll(0, 50)
+        window.scroll(0, currentPositionY)
+      }, 100)
+    }
     window.addEventListener('resize', handleResize)
 
     return () => {
@@ -42,6 +51,18 @@ export default function Camera(props: ThreeElements['perspectiveCamera']) {
       ref.current.updateProjectionMatrix()
     }
   }
+  useFrame(() => {
+    if(ref.current) {
+      // only first
+      const active = shelves[0].cassettes.find(cassette => cassette.name === activeCassette)
+      if (active)
+      {
+        ref.current.position.y += 20
+      } else {
+        ref.current.position.y -= 20
+      }
+    }
+  })
 
   return (
     <PerspectiveCamera
@@ -56,4 +77,3 @@ export default function Camera(props: ThreeElements['perspectiveCamera']) {
     />
   )
 }
-
