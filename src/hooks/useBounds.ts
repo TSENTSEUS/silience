@@ -14,7 +14,7 @@ export default function useBounds() {
   const isMobileAndNotSelected = isMobile && !cassetteSelected
 
   const currentPositionY = window.scrollY
-  window.scroll(0, 0)
+  window.scroll(0, 50)
   window.scroll(0, currentPositionY)
 
   return useShelves(state => {
