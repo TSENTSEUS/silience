@@ -5,6 +5,14 @@ body {
   overflow-x: hidden;
   min-height: -webkit-fill-available !important;
 }
+body.cassette-selected{
+  height: 100vh !important;
+  overflow: hidden !important;
+}
+canvas.cassette-selected{
+  height: 100vh !important;
+  overflow: hidden !important;
+}
 src {
   height: 100vh;
   min-height: -webkit-fill-available !important;

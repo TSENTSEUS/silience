@@ -197,6 +197,17 @@ export default function Cassette({ data: cassette, ...props }: CassetteProps) {
 
   // Hover
   const [hover, _setHover] = useState(false)
+  useEffect(() => {
+    if (window.innerWidth <= 986) {
+      if (hover) {
+        document.querySelector('.canvas')?.classList.add('cassette-selected')
+        document.querySelector('body')?.classList.add('cassette-selected')
+      } else {
+        document.querySelector('.canvas')?.classList.remove('cassette-selected')
+        document.querySelector('body')?.classList.remove('cassette-selected')
+      }
+    }
+  }, [hover])
   const setHover = (value: boolean) => {
     const newHover = value && !selected && !cassetteSelected
     if (hover !== newHover) _setHover(newHover)
@@ -235,8 +246,8 @@ export default function Cassette({ data: cassette, ...props }: CassetteProps) {
     if (!group || !wrapper || !springs.current) return
     const { rotateY, translateZ } = springs.current.get()
 
-    if ( selected && !hover) { 
-      springs.current.update({rotateY:rotateY+ 0.03}).start()
+    if (selected && !hover) {
+      springs.current.update({ rotateY: rotateY + 0.03 }).start()
     }
 
     // On hover
@@ -251,7 +262,7 @@ export default function Cassette({ data: cassette, ...props }: CassetteProps) {
   return (
     <group {...props} ref={parentWrapper}>
       {/* // Background plane for click */}
-      <Plane1 
+      <Plane1
         args={[30000, 40000]}
         onClick={() => selected && toggleSelected()}
         visible={selected && showVideoPlayer}
@@ -259,17 +270,17 @@ export default function Cassette({ data: cassette, ...props }: CassetteProps) {
         <meshBasicMaterial color={"black"} transparent={true} />
       </Plane1>
       <Plane1
-          args={[30, 30]}
-          onClick={() => toggleSelected(true)}
-          onPointerOver={() => setCursor("pointer")}
-          onPointerLeave={() => setCursor("auto")}
-          visible={selected && showVideoPlayer}
-          position={isMobile ? [deltaX - 100, 230, 1400] : [deltaX + 86, 230, 800]}
+        args={[30, 30]}
+        onClick={() => toggleSelected(true)}
+        onPointerOver={() => setCursor("pointer")}
+        onPointerLeave={() => setCursor("auto")}
+        visible={selected && showVideoPlayer}
+        position={isMobile ? [deltaX - 100, 230, 1400] : [deltaX + 86, 230, 800]}
       >
         <meshBasicMaterial map={new TextureLoader().load(UrlConfig.backButton)}
-                           transparent={true}
-                           opacity={1}
-                           color={"white"}
+          transparent={true}
+          opacity={1}
+          color={"white"}
         />
       </Plane1>
       <group ref={cassetteWrapper} position={[deltaX, 0, 0]}>
