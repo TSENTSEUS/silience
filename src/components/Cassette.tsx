@@ -1,7 +1,7 @@
 import { Controller, useSpring } from '@react-spring/three'
 import { Plane as Plane1 } from '@react-three/drei';
 import { ThreeElements, ThreeEvent, useFrame } from '@react-three/fiber'
-import { useEffect, useRef, useState } from 'react'
+import {useEffect, useLayoutEffect, useRef, useState} from 'react'
 import { Group, TextureLoader, Vector3 } from 'three'
 import '../index.scss';
 
@@ -197,6 +197,17 @@ export default function Cassette({ data: cassette, ...props }: CassetteProps) {
 
   // Hover
   const [hover, _setHover] = useState(false)
+  useEffect(() => {
+    if (window.innerWidth <= 986) {
+      if (hover) {
+        document.querySelector('.canvas')?.classList.add('cassette-selected')
+        document.querySelector('body')?.classList.add('cassette-selected')
+      } else {
+        document.querySelector('.canvas')?.classList.remove('cassette-selected')
+        document.querySelector('body')?.classList.remove('cassette-selected')
+      }
+    }
+  }, [hover])
   const setHover = (value: boolean) => {
     const newHover = value && !selected && !cassetteSelected
     if (hover !== newHover) _setHover(newHover)
@@ -306,16 +317,16 @@ export default function Cassette({ data: cassette, ...props }: CassetteProps) {
       {/* // Back button, not really necessary because all clicks go back */}
 
 
-      <VideoPlayer
-        visible={selected && showVideoPlayer}
-        url={cassette.video}
-        width={960}
-        height={540}
-        scale={32 * videoPlayerScale}
-        position={[videoPlayerX, videoPlayerY, 680]}
-        rotation-y={videoPlayerRotation}
-        pointerEvents={dragging ? 'none' : 'auto'}
-      />
+      {/*<VideoPlayer*/}
+      {/*  visible={selected && showVideoPlayer}*/}
+      {/*  url={cassette.video}*/}
+      {/*  width={960}*/}
+      {/*  height={540}*/}
+      {/*  scale={32 * videoPlayerScale}*/}
+      {/*  position={[videoPlayerX, videoPlayerY, 680]}*/}
+      {/*  rotation-y={videoPlayerRotation}*/}
+      {/*  pointerEvents={dragging ? 'none' : 'auto'}*/}
+      {/*/>*/}
 
       <Ground
         //  onClick={() => selected && toggleSelected()}

@@ -28,3 +28,19 @@ details input {
 progress[value]::-webkit-progress-bar {
   background-color: white;
 }
+body.cassette-selected{
+  height: 100vh !important;
+  overflow: hidden !important;
+}
+canvas.cassette-selected{
+  height: 100vh !important;
+  overflow: hidden !important;
+}
+body.mobile-cassette-selected{
+  height: 100vh !important;
+  overflow: hidden !important;
+}
+canvas.mobile-cassette-selected{
+  height: 100vh !important;
+  overflow: hidden !important;
+}
