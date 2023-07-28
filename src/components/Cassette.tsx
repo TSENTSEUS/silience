@@ -317,19 +317,19 @@ export default function Cassette({ data: cassette, ...props }: CassetteProps) {
       {/* // Back button, not really necessary because all clicks go back */}
 
 
-      {/*<VideoPlayer*/}
-      {/*  visible={selected && showVideoPlayer}*/}
-      {/*  url={cassette.video}*/}
-      {/*  width={960}*/}
-      {/*  height={540}*/}
-      {/*  scale={32 * videoPlayerScale}*/}
-      {/*  position={[videoPlayerX, videoPlayerY, 680]}*/}
-      {/*  rotation-y={videoPlayerRotation}*/}
-      {/*  pointerEvents={dragging ? 'none' : 'auto'}*/}
-      {/*/>*/}
+      <VideoPlayer
+        visible={selected && showVideoPlayer}
+        url={cassette.video}
+        width={960}
+        height={540}
+        scale={32 * videoPlayerScale}
+        position={[videoPlayerX, videoPlayerY, 680]}
+        rotation-y={videoPlayerRotation}
+        pointerEvents={dragging ? 'none' : 'auto'}
+      />
 
       <Ground
-        //  onClick={() => selected && toggleSelected()}
+        onClick={() => selected && toggleSelected()}
         position={[-4, CASSETTE_FLOOR_Y, -3]} visible={selected} />
     </group>
   )

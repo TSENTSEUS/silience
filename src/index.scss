@@ -44,3 +44,7 @@ canvas.mobile-cassette-selected{
   height: 100vh !important;
   overflow: hidden !important;
 }
+
+body {
+  overscroll-behavior: none;
+}
