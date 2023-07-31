@@ -20,10 +20,11 @@ import useStore from '../stores/useStore'
 import Cassette from './Cassette'
 
 export type ShelfProps = {
-  data: ShelfData
+  data: ShelfData,
+  draggedScroll: boolean
 } & ThreeElements['group']
 
-export default function Shelf({ data: shelf, ...props }: ShelfProps) {
+export default function Shelf({ data: shelf,draggedScroll, ...props }: ShelfProps) {
   const { cassetteSpacing } = useConstants()
   const { shelfMesh, shelfMaterial } = useScene()
   const { cassetteSelected } = useStore()
@@ -46,7 +47,7 @@ export default function Shelf({ data: shelf, ...props }: ShelfProps) {
             width={cassetteSpacing}
             height={CASSETTE_HEIGHT}
           >
-            <Cassette data={cassette} />
+            <Cassette data={cassette} draggedScroll={draggedScroll}/>
           </Box>
         ))}
       </Flex>

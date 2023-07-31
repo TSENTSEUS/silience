@@ -1,10 +1,9 @@
 import { Controller, useSpring } from '@react-spring/three'
 import { Plane as Plane1 } from '@react-three/drei';
 import { ThreeElements, ThreeEvent, useFrame } from '@react-three/fiber'
-import {useEffect, useLayoutEffect, useRef, useState} from 'react'
+import {useEffect, useRef, useState} from 'react'
 import { Group, TextureLoader, Vector3 } from 'three'
 import '../index.scss';
-
 import { CSSProperties } from 'react';
 
 type PlaneProps = {
@@ -52,14 +51,13 @@ import { useScrollToGroup } from './Scroll'
 import VideoPlayer from './VideoPlayer'
 
 export type CassetteProps = {
-  data: CassetteData
+  data: CassetteData,
+  draggedScroll:boolean,
 } & ThreeElements['group']
 
-export default function Cassette({ data: cassette, ...props }: CassetteProps) {
+export default function Cassette({ data: cassette,draggedScroll, ...props }: CassetteProps) {
   const { sleeveMesh, sleeveMaterial, vhsMesh, vhsMaterial } = useScene()
-
   const { cassetteAngle, cassetteClickTargetX } = useConstants()
-
   const { ref: parentWrapper, scrollToObject: scrollToShelf } =
     useScrollToGroup()
 
@@ -137,7 +135,11 @@ export default function Cassette({ data: cassette, ...props }: CassetteProps) {
   )
 
   const onPointerDown = (e: ThreeEvent<PointerEvent>) => {
+    if(draggedScroll){
+      return
+    }
     if (isMobile && !selected && !hover) {
+      console.log(draggedScroll)
       setHover(true)
       return
     }
@@ -155,10 +157,14 @@ export default function Cassette({ data: cassette, ...props }: CassetteProps) {
   const { cassetteSelected, set } = useStore()
   const hide = cassetteSelected && !selected
 
+
+
   const toggleSelected = (force: boolean = false) => {
     if (!force && isTransitioning) return;
     if (cassetteSelected && !selected) return
+
     const newSelected = !selected
+
     if (newSelected) {
       setHover(false)
       scrollToShelf()
@@ -197,17 +203,8 @@ export default function Cassette({ data: cassette, ...props }: CassetteProps) {
 
   // Hover
   const [hover, _setHover] = useState(false)
-  useEffect(() => {
-    if (window.innerWidth <= 986) {
-      if (hover) {
-        document.querySelector('.canvas')?.classList.add('cassette-selected')
-        document.querySelector('body')?.classList.add('cassette-selected')
-      } else {
-        document.querySelector('.canvas')?.classList.remove('cassette-selected')
-        document.querySelector('body')?.classList.remove('cassette-selected')
-      }
-    }
-  }, [hover])
+
+
   const setHover = (value: boolean) => {
     const newHover = value && !selected && !cassetteSelected
     if (hover !== newHover) _setHover(newHover)
@@ -221,6 +218,7 @@ export default function Cassette({ data: cassette, ...props }: CassetteProps) {
     translateY: hover ? CASSETTE_HOVER_TRANSLATE_Y : cassetteY,
     config: slowerSpringConfig
   })
+
 
   useEffect(() => {
     if (!cassetteSelected || !selected) return
@@ -239,12 +237,14 @@ export default function Cassette({ data: cassette, ...props }: CassetteProps) {
     cassetteTargetX,
   ])
 
+
   // Animate
   useFrame(() => {
     const group = cassetteGroup.current
     const wrapper = cassetteWrapper.current
     if (!group || !wrapper || !springs.current) return
     const { rotateY, translateZ } = springs.current.get()
+
 
     if ( selected && !hover) {
       springs.current.update({rotateY:rotateY+ 0.03}).start()
@@ -259,19 +259,22 @@ export default function Cassette({ data: cassette, ...props }: CassetteProps) {
     wrapper.position.x = translateX.get()
   })
 
+
   return (
     <group {...props} ref={parentWrapper}>
       {/* // Background plane for click */}
       <Plane1
         args={[30000, 40000]}
-        onClick={() => selected && toggleSelected()}
+        onClick={() => selected &&  toggleSelected()}
         visible={selected && showVideoPlayer}
         position={[0, 0, -3000]} >
         <meshBasicMaterial color={"black"} transparent={true} />
       </Plane1>
       <Plane1
           args={[30, 30]}
-          onClick={() => toggleSelected(true)}
+          onClick={(e:any) => {
+            toggleSelected(true)
+          }}
           onPointerOver={() => setCursor("pointer")}
           onPointerLeave={() => setCursor("auto")}
           visible={selected && showVideoPlayer}
@@ -287,18 +290,22 @@ export default function Cassette({ data: cassette, ...props }: CassetteProps) {
 
         <group
           ref={cassetteGroup}
-          onClick={(e) => {
-            e.stopPropagation()
+          onClick={(e:any) => {
+            // e.stopPropagation();
           }}
-          onPointerOver={() => setHover(true)}
-          onPointerMove={() => setHover(true)}
+          onPointerOver={() => {
+            setHover(true)
+          }}
+          onPointerMove={() => {
+            setHover(true)
+          }}
           onPointerOut={() => setHover(false)}
           onPointerDown={onPointerDown}
           visible={!hide}
         >
           <mesh
             geometry={sleeveMesh.geometry}
-            material={dynamicMaterial}
+             material={dynamicMaterial}
             rotation-x={Math.PI / 2}
             castShadow
             receiveShadow
@@ -317,16 +324,16 @@ export default function Cassette({ data: cassette, ...props }: CassetteProps) {
       {/* // Back button, not really necessary because all clicks go back */}
 
 
-      <VideoPlayer
-        visible={selected && showVideoPlayer}
-        url={cassette.video}
-        width={960}
-        height={540}
-        scale={32 * videoPlayerScale}
-        position={[videoPlayerX, videoPlayerY, 680]}
-        rotation-y={videoPlayerRotation}
-        pointerEvents={dragging ? 'none' : 'auto'}
-      />
+      {/*<VideoPlayer*/}
+      {/*  visible={selected && showVideoPlayer}*/}
+      {/*  url={cassette.video}*/}
+      {/*  width={960}*/}
+      {/*  height={540}*/}
+      {/*  scale={32 * videoPlayerScale}*/}
+      {/*  position={[videoPlayerX, videoPlayerY, 680]}*/}
+      {/*  rotation-y={videoPlayerRotation}*/}
+      {/*  pointerEvents={dragging ? 'none' : 'auto'}*/}
+      {/*/>*/}
 
       <Ground
         onClick={() => selected && toggleSelected()}

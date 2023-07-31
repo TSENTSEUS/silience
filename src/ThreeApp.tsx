@@ -1,5 +1,5 @@
 import { BakeShadows, Environment } from '@react-three/drei'
-import { Ref, useEffect, useRef } from 'react'
+import {Ref, useCallback, useEffect, useLayoutEffect, useRef, useState} from 'react'
 import { SpotLight } from 'three'
 import Camera from './components/Camera'
 import PostProcessing from './components/PostProcessing'
@@ -16,6 +16,9 @@ import useShelves from './stores/useShelves'
 import useStore from './stores/useStore'
 import useWrap from './stores/useWrap'
 import UrlConfig from './url-config'
+import {Simulate} from "react-dom/test-utils";
+import drag = Simulate.drag;
+import touchEnd = Simulate.touchEnd;
 
 export default function ThreeApp() {
   const { shelves, categories, shelfScale, groundCassettes } = useShelves()
@@ -36,13 +39,39 @@ export default function ThreeApp() {
     })
   }, [])
 
-  // Touch actions
+    // Touch actions
   useEffect(() => {
     document.body.style.touchAction = cassetteSelected ? 'none' : 'auto'
     return () => void (document.body.style.touchAction = 'auto')
   }, [cassetteSelected])
+    const [scrolling, setScrolling] = useState(false);
 
-  const tvSceneY = -SHELF_HEIGHT * shelves.length - TVSCENE_HEIGHT / 2
+    useEffect(() => {
+        let scrollingTimer: any;
+
+        const handleScroll = () => {
+            if (!scrolling) {
+                setScrolling(true);
+                console.log('Scrolling started');
+            }
+
+            clearTimeout(scrollingTimer);
+            scrollingTimer = setTimeout(() => {
+                setScrolling(false);
+                console.log('Scrolling stopped');
+            }, 400);
+        };
+
+        window.addEventListener('touchmove', handleScroll);
+        console.log(scrolling)
+
+        return () => {
+            window.removeEventListener('touchmove', handleScroll);
+            clearTimeout(scrollingTimer);
+        };
+    }, [scrolling]);
+
+    const tvSceneY = -SHELF_HEIGHT * shelves.length - TVSCENE_HEIGHT / 2
   return (
     <>
       <Camera />
@@ -77,7 +106,7 @@ export default function ThreeApp() {
       <group scale={shelfScale}>
         {shelves.map((shelf, i) => (
           <group key={i}>
-            <Shelf key={i} data={shelf} position-y={-SHELF_HEIGHT * i} />
+            <Shelf key={i} data={shelf} draggedScroll={scrolling}  position-y={-SHELF_HEIGHT * i} />
           </group>
         ))}
 
@@ -86,3 +115,5 @@ export default function ThreeApp() {
     </>
   )
 }
+
+
